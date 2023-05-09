@@ -17,3 +17,18 @@ Here\'s what I'll be covering in this 5-Day Challenge:
 
 -   Removing duplicate records\
     \*Cleaning numbers (percentages, money, dates and times)
+
+```{r}
+#| output: false
+library(tidyverse)
+library(readxl) # for reading in xl files
+library(jsonlite) # for reading in json
+```
+
+## **Day 1: Reading in Different File Types and Understanding Their Structure**
+
+Let's first read in a JSON data
+
+```{r}
+house <- read_json("")
+```
