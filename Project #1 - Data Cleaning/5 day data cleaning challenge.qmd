@@ -30,5 +30,19 @@ library(jsonlite) # for reading in json
 Let's first read in a JSON data
 
 ```{r}
-house <- read_json("")
+house <- read_json('house_3.json')
+```
+
+The first dataset I'll be working on is from **Tbilisi Housing Challenge 2020** on kaggle. The data was extracted from a popular Georgian house retail site on November 12th of 2020. The JSON file represents the 'raw' unclean data, straight from over 50k html pages.
+
+Next, let's take a look at the data in depth
+
+```{r}
+head(house,3)
+```
+
+```{r}
+json_structure <- capture.output(str(house))
+
+print(json_structure[1:16])
 ```
