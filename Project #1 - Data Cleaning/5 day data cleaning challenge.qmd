@@ -1,0 +1,19 @@
+---
+title: "5-Day Challenge: Data Cleaning in R"
+author: "Simon Tran"
+format: docx
+editor: visual
+---
+
+Data cleaning is a key part of data science, but it can be deeply frustrating. What are you supposed to do with the .json file you've been sent? How can you handle all these missing values in your data? Is there a fast way to get rid of the duplicate entries in your dataset? In this challenge, I'll tackle some of the common problems that I need to take care of before I can get started with my analysis.
+
+Here\'s what I'll be covering in this 5-Day Challenge:
+
+-   Reading in common data file formats: .json, .txt and .xlsx
+
+-   Filling in missing values
+
+-   Identifying & handling outliers
+
+-   Removing duplicate records\
+    \*Cleaning numbers (percentages, money, dates and times)
