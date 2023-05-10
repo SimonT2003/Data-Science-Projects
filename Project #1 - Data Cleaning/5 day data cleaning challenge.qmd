@@ -7,9 +7,9 @@ editor: visual
 
 Data cleaning is a key part of data science, but it can be deeply frustrating. What are you supposed to do with the .json file you've been sent? How can you handle all these missing values in your data? Is there a fast way to get rid of the duplicate entries in your dataset? In this challenge, I'll tackle some of the common problems that I need to take care of before I can get started with my analysis.
 
-Here\'s what I'll be covering in this 5-Day Challenge:
+Here's what I'll be covering in this 5-Day Challenge:
 
--   Reading in common data file formats: .json, .txt and .xlsx
+-   Reading in common data file formats: .json and .xlsx
 
 -   Filling in missing values
 
@@ -18,6 +18,10 @@ Here\'s what I'll be covering in this 5-Day Challenge:
 -   Removing duplicate records\
     \*Cleaning numbers (percentages, money, dates and times)
 
+For each day of this challenge, I'll be using different datasets to perform these tasks.
+
+## **Day 1: Reading in Different File Types and Understanding Their Structure**
+
 ```{r}
 #| output: false
 library(tidyverse)
@@ -25,9 +29,7 @@ library(readxl) # for reading in xl files
 library(jsonlite) # for reading in json
 ```
 
-## **Day 1: Reading in Different File Types and Understanding Their Structure**
-
-Let's first read in a JSON data
+Let's first read in a **JSON data**
 
 ```{r}
 house <- read_json('house_3.json')
@@ -46,3 +48,44 @@ json_structure <- capture.output(str(house))
 
 print(json_structure[1:16])
 ```
+
+```{r}
+# you can pull out individiual entries using double bracket notation
+# JSON is essentially lists inside a list
+
+house[[3]][[1]] # 3rd home and address row
+
+house[[12]][[8]] # 12th home and price row
+
+house[[450]][[8]] # 450th home and price row
+```
+
+From the example outputs above, "Queen Ketevan Avenue, Isani, Isani District, Tbilisi" is the address of the 3rd home. "70,000" represents the price of the 12th home. Similarly, "145,000" represents the price of the 450th home. So, that's all for understanding the structure of a JSON dataset.
+
+Next, let's read in a new file type: **.XLSX file**
+
+```{r}
+library(rio) # package that can import all sheets with one line of code
+```
+
+```{r}
+snap19 <- import_list('FY19.xls')
+```
+
+```{r}
+str(snap19)
+```
+
+```{r}
+head(snap19)
+```
+
+This dataset covers the US Supplemental Nutrition Assistance Program, more commonly known as SNAP. The program is the successor to the Food Stamps program previously in place. The program provides food assistance to low-income families in the form of a debit card. The US Dept of Agriculture, which maintains consumption data, does not release raw data on what foods are consumed - only summary reports. NERO, MARO, SERO, etc., are all different regions in the US. For example, Arizona belongs in the WRO (West Regional Office), and New York belongs in NERO (Northeast Regional Office).
+
+## **Day 2: Dealing with Missing Values**
+
+```{r}
+library(mice) # package for categorical & numeric imputation
+```
+
+Let's read in a new data
