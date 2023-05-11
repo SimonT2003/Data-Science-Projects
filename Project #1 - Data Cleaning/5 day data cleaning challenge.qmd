@@ -85,5 +85,49 @@ This dataset covers the US Supplemental Nutrition Assistance Program, more commo
 ## **Day 2: Dealing with Missing Values**
 
 ```{r}
+library(tidyverse)
 library(mice) # package for categorical & numeric imputation
 ```
+
+Let's read in the data:
+
+```{r}
+train <- read.csv('train (1).csv')
+```
+
+I will be using the train.csv file from the titanic to deal with the missing values.
+
+```{r}
+head(train,3)
+```
+
+```{r}
+train <- tibble(train) # tibble() preserve all the variable types
+
+head(train)
+```
+
+Tibble have a cleaner print format, making it easier to view and understand the data. Tibble also have a stricter syntax, which helps prevent common data manipulation errors
+
+```{r}
+str(train)
+```
+
+Let's check for missing values from the dataset
+
+```{r}
+any(is.na(train))
+```
+
+Is the data missing at random (MAR) or is it Meaningfully Missing (MM)
+
+```{r}
+# make a missing map!
+library(Amelia)
+```
+
+```{r}
+missmap(train)
+```
+
+It looks like the 2% of the missing data comes from 'Age'.
