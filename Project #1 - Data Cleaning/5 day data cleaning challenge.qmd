@@ -29,7 +29,7 @@ library(readxl) # for reading in xl files
 library(jsonlite) # for reading in json
 ```
 
-Let's first read in a **JSON data**
+Let's first read in a **JSON file**
 
 ```{r}
 house <- read_json('house_3.json')
@@ -37,7 +37,7 @@ house <- read_json('house_3.json')
 
 The first dataset I'll be working on is from **Tbilisi Housing Challenge 2020** on kaggle. The data was extracted from a popular Georgian house retail site on November 12th of 2020. The JSON file represents the 'raw' unclean data, straight from over 50k html pages.
 
-Next, let's take a look at the data in depth
+Next, let's take a look at the data structure
 
 ```{r}
 head(house,3)
@@ -73,10 +73,6 @@ snap19 <- import_list('FY19.xls')
 ```
 
 ```{r}
-str(snap19)
-```
-
-```{r}
 head(snap19)
 ```
 
@@ -87,6 +83,7 @@ This dataset covers the US Supplemental Nutrition Assistance Program, more commo
 ```{r}
 library(tidyverse)
 library(mice) # package for categorical & numeric imputation
+library(dplyr)
 ```
 
 Let's read in the data:
@@ -119,7 +116,7 @@ Let's check for missing values from the dataset
 any(is.na(train))
 ```
 
-Is the data missing at random (MAR) or is it Meaningfully Missing (MM)
+Since there are missing values in this dataset. Is the data missing at random (MAR) or is it Meaningfully Missing (MM)?
 
 ```{r}
 # make a missing map!
@@ -130,4 +127,87 @@ library(Amelia)
 missmap(train)
 ```
 
-It looks like the 2% of the missing data comes from 'Age'.
+It looks like the 2% of the missing data comes from 'Age'. The age of some passengers was simply not recorded or was lost over time. We could remove this column. However, if the column with missing values is important for the analysis and for the main question we're interested in, then removing the column may not be the right move. But let's practice removing it for this example.
+
+```{r}
+train_removed = subset(train, select = -c(Age))
+
+head(train_removed)
+```
+
+```{r}
+missmap(train_removed)
+```
+
+You can see that there are no more missing values. That's one way to deal with missing values. Again, if 'Age' was important in our analysis then this method would not be preferable. The next method that may be helpful would be imputation.
+
+I'll use the "Mice Algorithm" (Multiple Imputation by Chained Equations), which is a statistical technique used to impute missing data in a dataset. It is based on the idea that missing values can be imputed by predicting them from other variables in the dataset.
+
+```{r}
+imp <- mice(train, m = 5, method = "pmm") # pmm means predictive mean matching
+summary(imp)
+```
+
+```{r}
+completedData <- complete(imp,1)
+```
+
+The missing values have been replaced with the imputed values in the first of the five datasets. This is not 100% completed. I think there might be other ways to handle missing values, but this just for practice.
+
+## **Day 3: Identifying and Handling Outliers**
+
+```{r}
+library(outliers)
+library(ggplot2)
+```
+
+Let's read in the data:
+
+```{r}
+tx_salary <- read.csv('texas_salaries.csv')
+```
+
+Database of compensation for Texas state employees, as published by [The Texas Tribune](https://salaries.texastribune.org/)
+
+```{r}
+head(tx_salary,5)
+```
+
+Next, let's plot it to get an idea of the outliers:
+
+```{r}
+ggplot(tx_salary,aes(x="ANNUAL", y=ANNUAL)) + geom_boxplot() # plotting annual salary
+```
+
+```{r}
+# salary outliers within gender
+ggplot(tx_salary,aes(GENDER,ANNUAL)) + geom_boxplot() + coord_flip()
+```
+
+```{r}
+# salary outliers by ethnicity
+ggplot(tx_salary,aes(ETHNICITY,ANNUAL)) + geom_boxplot() + coord_flip()
+```
+
+Interestingly, while mean salaries are rather similar across groups, and all groups have outliers, the most extreme outliers on the high end are white and male. The white group does not have outliers on the low end, whereas black, hispanic and other all do.
+
+```{r}
+# hrs per week and annual salary should be highly correlated and predictable.
+# we do want to know if there are observations with low hours but high salaries
+# or with high hour but low salaries.
+# Are there people with comparable salaries but very different hours worked?
+ggplot(tx_salary,aes(HRS.PER.WK, ANNUAL)) + geom_point()
+```
+
+```{r}
+# as expected, a majority are 40 hrs per week
+# but there are many observations of cases where people are working 40 hrs
+# and making similar annual salaries to others working 20-35 hours.
+# let's look at hrly rate
+
+ggplot(tx_salary,aes(HRLY.RATE, ANNUAL)) + geom_point()
+```
+
+Looks like a lot of missing data there - it would not make sense for people with hourly rates of 0 to also have an annual salary, so hourly rate is likely not a good variable to use in this dataset.
+
+
