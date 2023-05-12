@@ -210,4 +210,187 @@ ggplot(tx_salary,aes(HRLY.RATE, ANNUAL)) + geom_point()
 
 Looks like a lot of missing data there - it would not make sense for people with hourly rates of 0 to also have an annual salary, so hourly rate is likely not a good variable to use in this dataset.
 
+Let's identify which rows contain outliers. We can see them in the visualizations\... but where are they in the data?
+
+```{r}
+# calculate the z-scores
+outlier_scores <- scores(tx_salary$ANNUAL)
+```
+
+```{r}
+# create a vector that holds TRUE if outlier_score is greater than 
+# 3 or less than -3
+is_outlier <- outlier_scores > 3 | outlier_scores < -3
+```
+
+```{r}
+# add a column to data to indicate which are outliers on the var selected
+tx_salary$annual_outlier <- is_outlier
+```
+
+Now outlier and non-outlier values can be graphed or analyzed separately
+
+```{r}
+ggplot(tx_salary,aes(ETHNICITY,ANNUAL)) + geom_boxplot() + coord_flip() +
+facet_wrap(~annual_outlier)
+```
+
+```{r}
+# create a dataframe with only the outliers
+tx_outliers <- tx_salary[outlier_scores > 3 | outlier_scores < -3, ]
+
+# call it
+head(tx_outliers)
+```
+
+```{r}
+ggplot(tx_outliers,aes(x="ANNUAL", y=ANNUAL)) + geom_boxplot()
+```
+
+Outliers from the outliers.
+
+```{r}
+ggplot(tx_outliers,aes(GENDER,ANNUAL)) + geom_boxplot() + coord_flip()
+```
+
+```{r}
+ggplot(tx_outliers,aes(ETHNICITY,ANNUAL)) + geom_boxplot() + coord_flip()
+```
+
+There are both reasons for keeping and removing outliers. Sometimes, they are unnecessary noise and it is okay to get rid of them since we are trying to predict things for the masses and not for the extremes. In other cases, they are an important part of the story that the data tells. With salary data reporting, it would often be the case that removing outliers would be unrealistic and inaccurate, but we'll still practice the strats provided on this data set since we know there are outliers!
+
+```{r}
+tx_norms <- tx_salary[tx_salary$annual_outlier == FALSE, ]
+```
+
+```{r}
+ggplot(tx_norms,aes(x="ANNUAL", y=ANNUAL)) + geom_boxplot()
+```
+
+```{r}
+# comparing distribution of initial data to data with outliers removed
+ggplot(tx_salary, aes(ANNUAL)) + geom_histogram(binwidth=10000)
+```
+
+```{r}
+ggplot(tx_norms, aes(ANNUAL)) + geom_histogram(binwidth=10000)
+```
+
+Another option for dealing with outliers is removing and replacing via imputation
+
+```{r}
+# replace the outliers with NA
+tx_salary[outlier_scores > 3 | outlier_scores < -3, "ANNUAL"] <- NA
+```
+
+```{r}
+# check
+summary(tx_salary$ANNUAL)
+```
+
+```{r}
+# replace with mean (median can be more accurate in salaries,
+# but they are not far off without the outliers!)
+
+# let's use a function and then apply it to the column
+impute <- function(x){
+    if(is.na(x)){
+        return(48400) # mean value above
+    }
+    else {
+        return(x)
+    }
+}
+```
+
+```{r}
+tx_salary$ANNUAL <- sapply(tx_salary$ANNUAL, FUN = impute)
+```
+
+```{r}
+# check
+summary(tx_salary$ANNUAL)
+```
+
+To reflect, there are many ways to deal with outliers. The common ways are removing the rows from the data, considering outliers and inliners separately, and removing and replacing via imputation.
+
+## 
+**Day 4: Removing Duplicate Records**
+
+Duplicate records can be common when webscraping (the same table may exist on mulitple pages, for example). Removing duplicate records is important because it can lead to incorrect conclusions about observations being higher frequency than they actually are.
+
+For some data, another instance of the same information is important and part of the structure of the set, The stuff that gets deduplicated should be unintentional repetitions that were COLLECTED or GATHERED too frequently for how often they actually occurred.
+
+```{r}
+library(tidyverse)
+library(mice)
+```
+
+Let's read in the data:
+
+```{r}
+steam_data <- read.csv("steam-200k.csv", header = TRUE, stringsAsFactors = FALSE)
+
+# add col names
+names(steam_data) <- c('user_id','game_title', "behavior_name","value","x")
+
+#remove last col and create df
+steam_data <- tibble(steam_data[, 1:4])
+```
+
+Steam is the world's most popular PC Gaming hub. With a massive collection that includes everything from AAA blockbusters to small indie titles, great discovery tools can be super valuable for Steam.
+
+This dataset is a list of user behaviors, with columns: user-id, game-title, behavior-name, value. The behaviors included are 'purchase' and 'play'. The value indicates the degree to which the behavior was performed - in the case of 'purchase' the value is always 1, and in the case of 'play' the value represents the number of hours the user has played the game.
+
+Next, we can use the **`distinct()`** function from **`dplyr`** to identify and remove duplicate rows based on selected columns. For example, if we want to remove duplicates based on the **`user_id`** and **`game_title`** columns, we can do:
+
+```{r}
+steam_data_unique <- distinct(steam_data, user_id, game_title, .keep_all = TRUE)
+
+```
+
+Finally, we can write the cleaned data frame to a new CSV file:
+
+```{r}
+write.csv(steam_data_unique, "steam-200k-cleaned.csv", row.names = FALSE)
+```
+
+That was just a basic way to remove duplicate values. A good thing to note is that our original steam_data had 199999 observations, and after removing the duplicate values we're left with 128804. It's important to consider why there were duplicates in the first place and whether removing them could result in biased or incomplete data.
+
+## **Day 5: Cleaning Numeric Columns**
+
+Numeric data can come with all sorts of non-numeric characters such as percentage signs, number signs of other special characters that may have meaning in another programming language but act only as noise in yours.
+
+R plays it safe - so any column that comes in with special characters is usually labeled and treated as a character column rather than a numeric column.
+
+Regular expressions can be used, but should be used as a last resort. They are rigid, easily broken, hard to read and hard to debug. Instead, parse_number() from tidyverse can be a great option.
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+# character vector of numbers
+to_parse <- c(100, "10,000", "%100", "$50")
+
+# check to make sure it's numeric
+print("Class before:")
+class(to_parse)
+
+# parse numbers
+parsed_numbers <- parse_number(to_parse)
+
+# check class
+print("Class after:")
+class(parsed_numbers)
+
+# see what it looks like now
+parsed_numbers
+```
+
+## End of code.
+
+
+
 
