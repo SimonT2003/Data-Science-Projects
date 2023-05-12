@@ -72,10 +72,6 @@ library(rio) # package that can import all sheets with one line of code
 snap19 <- import_list('FY19.xls')
 ```
 
-```{r}
-head(snap19)
-```
-
 This dataset covers the US Supplemental Nutrition Assistance Program, more commonly known as SNAP. The program is the successor to the Food Stamps program previously in place. The program provides food assistance to low-income families in the form of a debit card. The US Dept of Agriculture, which maintains consumption data, does not release raw data on what foods are consumed - only summary reports. NERO, MARO, SERO, etc., are all different regions in the US. For example, Arizona belongs in the WRO (West Regional Office), and New York belongs in NERO (Northeast Regional Office).
 
 ## **Day 2: Dealing with Missing Values**
