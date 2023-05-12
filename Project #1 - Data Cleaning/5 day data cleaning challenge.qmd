@@ -314,12 +314,11 @@ summary(tx_salary$ANNUAL)
 
 To reflect, there are many ways to deal with outliers. The common ways are removing the rows from the data, considering outliers and inliners separately, and removing and replacing via imputation.
 
-## 
-**Day 4: Removing Duplicate Records**
+## **Day 4: Removing Duplicate Records**
 
-Duplicate records can be common when webscraping (the same table may exist on mulitple pages, for example). Removing duplicate records is important because it can lead to incorrect conclusions about observations being higher frequency than they actually are.
+Duplicate records can be common when webscraping (the same table may exist on multiple pages, for example). Removing duplicate records is important because it can lead to incorrect conclusions about observations being higher frequency than they actually are.
 
-For some data, another instance of the same information is important and part of the structure of the set, The stuff that gets deduplicated should be unintentional repetitions that were COLLECTED or GATHERED too frequently for how often they actually occurred.
+For some data, another instance of the same information is important and part of the structure of the set, The stuff that gets duplicated should be unintentional repetitions that were COLLECTED or GATHERED too frequently for how often they actually occurred.
 
 ```{r}
 library(tidyverse)
@@ -390,7 +389,3 @@ parsed_numbers
 ```
 
 ## End of code.
-
-
-
-
